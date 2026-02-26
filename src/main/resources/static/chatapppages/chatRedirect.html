@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Emily's Chat app</title>
+  <link rel="stylesheet" href="/style.css">
+ </head>
+ <body>
+  <h1><a href="http://localhost:8090"> Emily's Chat App</a></h1>
+  <div th:if="${loggedIn==false}" id="noLoginView">
+   <h3 class="title"><a href="loginPage.html">Login</a> or <a href="./registerPage.html">Register</a> to enter the Chat</h3>
+  </div>
+  <div th:if="${loggedIn==true}" id="loggedInView">
+  </div>
+ </body>
+</html>

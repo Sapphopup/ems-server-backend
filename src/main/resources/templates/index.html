@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Emily's Server</title>
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+<body>
+
+
+<div style="justify-content:space-between;display: flex"><h1 style="float:left;color: #8FF7C4">Emily's Archive</h1>
+    <div style="float:right; display: flex">
+
+    </div>
+    <h1 style="position: relative;float: right; color: #8FF7C4" id="BlogHeading">Emily's Blog and posts</h1></div>
+
+
+<div style="justify-content: space-between;display: flex" id="IndexContainer">
+    <div style="float:left;">
+        <h1 style="color: #8FF7C4">Index:</h1>
+        <p>
+            <a href="https://gitlab.azubi.server.lan/azubibetreuung_25/ecarozzini/"><img src="/images/GitlabIcon.png"
+                                                                                         id="gitlabicon"
+                                                                                         alt="gitlab Icon" width="50"
+                                                                                         height="50">
+                Emily's Gitlab repo</a></p>
+        <p>
+            <a href="https://github.com/Sapphopup"><img src="/images/GithubIcon.png" id="githubicon" alt="github Icon"
+                                                        width="50" height="50">
+                Emily's GitHub profile</a></p>
+        <p>
+            <a href="/calculatorwebsite.html"><img src="/images/CalculatorIcon.png" alt="Calculator Icon" width="50"
+                                                   height="50">
+                Calculator </a></p>
+        <p>
+            <a href="/mediasug/mediasuggestions.html"><img src="/images/mediaIcon.png" alt="Media-tab Icon" width="50"
+                                                                    height="50">
+                Media Suggestions </a></p>
+        <p>
+            <a href="/redirect"><img src="/images/chatIcon.png" alt="Chat Icon" width="50" height="50">
+
+                Chat </a></p>
+        </p>
+
+    </div>
+
+
+    <div style="float:right;margin-right:25px" id="BlogContainer">
+        <p style="margin-top:0px; margin-bottom: 20px;height:100%">
+            <object data="/blog/latestblogpost.txt" type="file/txt" id="LatestBlog"></object>
+        </p>
+    </div>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag.js" defer></script>
+</html>

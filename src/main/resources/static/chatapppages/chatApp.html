@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Emily's Chat app</title>
+  <link rel="stylesheet" href="../style.css">
+ </head>
+ <body>
+  <h1>Welcome,</h1>
+  <div th:text="*{userName}"></div>
+  <h1>, to Emily's Chatapp</h1>
+  <form action="/logout">
+   <button type="submit">Log out</button>
+  </form>
+  <div id="chatHolder">
+      <form action="/joinForum"><button type="submit"> PUBLIC MAIN FORUM</button></form>
+  </div>
+  <form action="/chatapppages/createNewChat.html">
+   <button type="submit">create new chat</button>
+  </form>
+ </body>
+</html>

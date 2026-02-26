@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Emily's Chat app</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <h1>Emily's Chatapp</h1>
+    <h2>New Chat</h2>
+    <form>
+        <form class="form" action="/submitChat" method="post">
+            <label for="chatName">Login name:</label> <br/>
+            <input type="text" name="loginName"/>      <br/>
+
+            <button type="submit">Submit</button>
+        </form>
+        <nav class="navbarUserSearch">
+            <div class="container-fluid">
+                <input type="search" id="user-add-search-input"
+                       class="user-add-search-input" name="userToAddId" placeholder="search for user to add...">
+                <button type="submit" style="scale:40%" class="search-btn">Search</button>
+            </div>
+        </nav>
+    </form>
+    <form action="/cancelNewChat">
+
+        <button type="submit">Cancel</button>
+
+    </form>
+</body>
+</html>

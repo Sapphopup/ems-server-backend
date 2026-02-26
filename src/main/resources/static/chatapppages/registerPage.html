@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+     <title>Emily's Chat app</title>
+      <link rel="stylesheet" href="../style.css">
+    </head>
+    <body>
+      <h1><a href="localhost:8090"> Emily's Chat App</a></h1>
+      <form action="/register" method="post">
+          <label for="loginName">Login name:</label>        <br/>
+          <input type="text" name="loginName"/>             <br/>
+
+          <label for="displayName">Display name:</label>    <br/>
+          <input type="text" name="displayName"/>           <br/>
+
+          <label for="password">Password:</label>           <br/>
+          <input type="password" name="password"/>          <br/>
+
+          <button type="submit">Submit</button>
+      </form>
+      <br/>
+       <p th:text="#{errorMessage}"></p>
+    </body>
+</html>
