@@ -339,9 +339,12 @@ public class DatabaseManager {
     @SneakyThrows
     public List<String> convertResultToStringList(ResultSet rs){
             List<String> res = new ArrayList<>();
-            for(int i = 0; i < rs.getFetchSize(); i++){
-                res.add(rs.getString(i+1));
+            if(rs!=null){
+                for(int i = 0; i < rs.getFetchSize(); i++){
+                    res.add(rs.getString(i+1));
+                }
             }
+
             return res;
     }
 }
