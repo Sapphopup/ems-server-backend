@@ -23,13 +23,19 @@ public class DatabaseManager {
     String password;
     Connection conn;
     Statement stmt;
+    //region REGION manage user
+    @Getter
+    private String latestGeneratedUserID;
+    //region REGION manage chatroom
+    @Getter
+    private String lastGeneratedChatID = "";
+
     @SneakyThrows
-    public DatabaseManager(){
+    public DatabaseManager() {
         this.databaseUrl = "jdbc:mariadb://localhost:3306/chat";     //jdbc:mariadb://localhost:3306/chat
         this.databaseUser = "test";                                 //test
         this.password = "test123";                                  //test123
     }
-
 
     public ResultSet connectToDbAndQueryForData(String query) {
         ResultSet result = null;
@@ -65,7 +71,8 @@ public class DatabaseManager {
         }
         return result;
     }
-    public boolean connectToDbAndExecuteQuery(String query){
+
+    public boolean connectToDbAndExecuteQuery(String query) {
         Connection conn = null;
         boolean result = false;
         Statement stmt = null;
@@ -100,18 +107,17 @@ public class DatabaseManager {
         }
         return result;
     }
+
     @SneakyThrows
-    public boolean checkIfUnique(String valueToCheck, String whereToCheck, String whatToCheck){
-        String query = "SELECT "+whatToCheck+" FROM "+whereToCheck+" WHERE "+whatToCheck+" = '"+valueToCheck+"';";
-        return !(connectToDbAndQueryForData(query).getFetchSize() >0);
+    public boolean checkIfUnique(String valueToCheck, String whereToCheck, String whatToCheck) {
+        String query = "SELECT " + whatToCheck + " FROM " + whereToCheck + " WHERE " + whatToCheck + " = '" + valueToCheck + "';";
+        return !(connectToDbAndQueryForData(query).getFetchSize() > 0);
     }
-
-
 
     //region REGION load Message
     public Message loadMessage(String mID) {
         return new Message(mID, loadTypeOfMessage(mID), loadContentOfMessage(mID), loadSenderOfMessage(mID),
-                                loadTimeStampOfMessage(mID));
+                loadTimeStampOfMessage(mID));
     }
 
     @SneakyThrows
@@ -141,6 +147,7 @@ public class DatabaseManager {
         return connectToDbAndQueryForData(messageContentQ).getString(1);
 
     }
+    //endregion
 
     @SneakyThrows
     User loadSenderOfMessage(String mID) {
@@ -153,22 +160,23 @@ public class DatabaseManager {
         String getTimeStampQuery = "SELECT timeStamp FROM Messages WHERE messageID = '" + mID + "';";
         return connectToDbAndQueryForData(getTimeStampQuery).getTimestamp(1);
     }
-    //endregion
 
     //region REGION load user
     public User loadUser(String uID) {
 
         return new User(uID, loadUsername(uID), loadChatrooms(uID));
     }
+    //endregion
 
     @SneakyThrows
     public String loadUsername(String uID) {
         String usernameQuery = "SELECT username FROM Users WHERE userID = '" + uID + "';";
-        String uName="";
+        String uName = "";
         ResultSet resultSet = connectToDbAndQueryForData(usernameQuery);
-        if(resultSet.next()) uName = resultSet.getString("username");
+        if (resultSet.next()) uName = resultSet.getString("username");
         return uName;
     }
+    //endregion
 
     @SneakyThrows
     public List<Chatroom> loadChatrooms(String uID) {
@@ -176,26 +184,25 @@ public class DatabaseManager {
         ResultSet cList = connectToDbAndQueryForData(chatroomListQuery);
         List<Chatroom> usersChats = new ArrayList<Chatroom>();
         for (int i = 0; i < cList.getFetchSize(); i++) {
-            if(cList.next()){
+            if (cList.next()) {
                 usersChats.add(loadChatroom(cList.getString("chatroomID")));
                 //KEYPOINT loads chatroom by ID and adds it to the List/l
             }
         }
         return usersChats;
     }
-    //endregion
 
     //region REGION load Chatroom
     @SneakyThrows
     public Chatroom loadChatroom(String cID) {
         String chatNameQuery = "SELECT chatname FROM Chatrooms WHERE chatroomID = '" + cID + "';";
-        java.sql.ResultSet rs  = connectToDbAndQueryForData(chatNameQuery);
+        java.sql.ResultSet rs = connectToDbAndQueryForData(chatNameQuery);
         String chatName = "If you see this there was an error loading the chatname";
-        if(rs.next()) chatName = rs.getString("chatname");
+        if (rs.next()) chatName = rs.getString("chatname");
         String participantIdQuery = "SELECT userID FROM UsersInChatrooms WHERE chatroomID = '" + cID + "';"; //todo query database
         ResultSet pIdQResults = connectToDbAndQueryForData(participantIdQuery);
         List<String> participantIDs = new ArrayList<>();
-        if(pIdQResults.next()){
+        if (pIdQResults.next()) {
             for (int i = 0; i < pIdQResults.getFetchSize(); i++) {
                 String pId = pIdQResults.getString(i);
 
@@ -208,7 +215,7 @@ public class DatabaseManager {
         String chatHistoryQuery = "SELECT messageID FROM Messages WHERE chatroomID = '" + cID + "' ORDER BY timeStamp;";
         ResultSet cHistory = connectToDbAndQueryForData(chatHistoryQuery);
         List<Message> history = new ArrayList<>();
-        if(cHistory.next()){
+        if (cHistory.next()) {
             for (int i = 0; i < rs.getFetchSize(); i++) {
                 String mID = cHistory.getString(i);
                 history.add(loadMessage(mID));//KEYPOINT loading message and adding it to the chat history
@@ -219,134 +226,129 @@ public class DatabaseManager {
         Chatroom chat = new Chatroom(cID, participantIDs, history, chatName);
         return chat;
     }
-    //endregion
 
-    //region REGION manage user
-        @Getter
-        private String latestGeneratedUserID;
-        @SneakyThrows
-        public boolean createNewUserInDB(String username){
-            //generate userID
-             String getUIDQ = "SELECT COUNT(*) AS count FROM Users;";
-            System.out.println(getUIDQ);
-            ResultSet resultSet = connectToDbAndQueryForData(getUIDQ);
+    @SneakyThrows
+    public boolean createNewUserInDB(String username) {
+        //generate userID
+        String getUIDQ = "SELECT COUNT(*) AS count FROM Users;";
+        System.out.println(getUIDQ);
+        ResultSet resultSet = connectToDbAndQueryForData(getUIDQ);
 
-            int count = 0;
+        int count = 0;
 
-            if (resultSet.next()) {
-                count = resultSet.getInt("count");
-            }
-
-            System.out.println(count);
-
-             String uID = "U"+ (count += 1) +"";
-             latestGeneratedUserID = uID;
-             //new Users entry
-             String insertUQ = "INSERT INTO Users (userID,username) VALUES('"+uID+"','"+username+"');";
-             return connectToDbAndExecuteQuery(insertUQ);
+        if (resultSet.next()) {
+            count = resultSet.getInt("count");
         }
-        @SneakyThrows
-        public boolean createNewLoginInDB(String loginName, String password, String uID){
-             //new login entry
-             String insertLQ = "INSERT INTO Logins (loginName,userID,password) VALUES ('"+loginName+"','"+uID+"','"+password+"');";
-            System.out.println(insertLQ);
-             return connectToDbAndExecuteQuery(insertLQ);
-        }
-        @SneakyThrows
-        public boolean changeUsername(String newUsername, String uID){
-        String changeNQ = "UPDATE Users SET username = '"+newUsername+"' WHERE userID = '"+uID+"';";
+
+        System.out.println(count);
+
+        String uID = "U" + (count += 1) + "";
+        latestGeneratedUserID = uID;
+        //new Users entry
+        String insertUQ = "INSERT INTO Users (userID,username) VALUES('" + uID + "','" + username + "');";
+        return connectToDbAndExecuteQuery(insertUQ);
+    }
+
+    @SneakyThrows
+    public boolean createNewLoginInDB(String loginName, String password, String uID) {
+        //new login entry
+        String insertLQ = "INSERT INTO Logins (loginName,userID,password) VALUES ('" + loginName + "','" + uID + "','" + password + "');";
+        System.out.println(insertLQ);
+        return connectToDbAndExecuteQuery(insertLQ);
+    }
+
+    @SneakyThrows
+    public boolean changeUsername(String newUsername, String uID) {
+        String changeNQ = "UPDATE Users SET username = '" + newUsername + "' WHERE userID = '" + uID + "';";
         return connectToDbAndExecuteQuery(changeNQ);
 
-        }
-        @SneakyThrows
-        public boolean changePassword(String newPassword, String uID){
-            String changePQ = "UPDATE Logins SET password = '"+newPassword+"' WHERE userID = '"+uID+"';";
-            return connectToDbAndExecuteQuery(changePQ);
-        }
-
+    }
 
 
     //endregion
 
     //region REGION manage message
 
-        @SneakyThrows
-        public boolean sendMessageToChatroom(@NotNull Message m, String chatId){
-            int type;
-            switch(m.getType()){
-                case SYSTEM_INFO -> type = 0;
-                case TEXT -> type = 1;
-                case MEDIA -> type = 2;
-                default -> type = -1;
-            }
-            String content;
-            content = m.getContent();
-            String sendMQuery = "INSERT INTO Messages (messageID,chatroomID,userID,messageType,content,timeStamp) " +
-                    "VALUES ('"+m.getMessageId()+"','"+chatId+"','"
-                                                         +m.getSender().getUserId()+"','"
-                                                         +type+"','"+content+"','"
-                                                         +m.getTimeStamp()+"');";
-            return connectToDbAndExecuteQuery(sendMQuery);
+    @SneakyThrows
+    public boolean changePassword(String newPassword, String uID) {
+        String changePQ = "UPDATE Logins SET password = '" + newPassword + "' WHERE userID = '" + uID + "';";
+        return connectToDbAndExecuteQuery(changePQ);
+    }
+
+    @SneakyThrows
+    public boolean sendMessageToChatroom(@NotNull Message m, String chatId) {
+        int type;
+        switch (m.getType()) {
+            case SYSTEM_INFO -> type = 0;
+            case TEXT -> type = 1;
+            case MEDIA -> type = 2;
+            default -> type = -1;
         }
-        @SneakyThrows
-        public boolean editMessage(String newContent, String mID){
-            String editMQ = "UPDATE Messages SET content = '"+newContent+"' WHERE messageID = '"+mID+"';";
-            return connectToDbAndExecuteQuery(editMQ);
-        }
+        String content;
+        content = m.getContent();
+        String sendMQuery = "INSERT INTO Messages (messageID,chatroomID,userID,messageType,content,timeStamp) " +
+                "VALUES ('" + m.getMessageId() + "','" + chatId + "','"
+                + m.getSender().getUserId() + "','"
+                + type + "','" + content + "','"
+                + m.getTimeStamp() + "');";
+        return connectToDbAndExecuteQuery(sendMQuery);
+    }
     //endregion
 
-    //region REGION manage chatroom
-        @Getter
-        private String lastGeneratedChatID = "";
+    @SneakyThrows
+    public boolean editMessage(String newContent, String mID) {
+        String editMQ = "UPDATE Messages SET content = '" + newContent + "' WHERE messageID = '" + mID + "';";
+        return connectToDbAndExecuteQuery(editMQ);
+    }
 
-        @SneakyThrows
-        public boolean createNewChat(String chatName){
-            //generate chat ID
-            String getCIDQ = "SELECT COUNT(chatroomID) FROM Chatrooms;";
-            String cID = "C"+connectToDbAndQueryForData(getCIDQ).getInt(1)+1+"";
-            lastGeneratedChatID = cID;
-            String createNCQ = "INSERT INTO Chatrooms (chatroomID,chatname)VALUES('"+cID+"','"+chatName+"');";
-            return connectToDbAndExecuteQuery(createNCQ);
+    @SneakyThrows
+    public boolean createNewChat(String chatName) {
+        //generate chat ID
+        String getCIDQ = "SELECT COUNT(chatroomID) FROM Chatrooms;";
+        String cID = "C" + connectToDbAndQueryForData(getCIDQ).getInt(1) + 1 + "";
+        lastGeneratedChatID = cID;
+        String createNCQ = "INSERT INTO Chatrooms (chatroomID,chatname)VALUES('" + cID + "','" + chatName + "');";
+        return connectToDbAndExecuteQuery(createNCQ);
+    }
+
+    @SneakyThrows
+    public boolean addUsersToChat(List<String> newMembers, String cID) {
+        String conIDQ = "SELECT COUNT(connectionID) FROM UsersInChatrooms;";
+        String conID = "C" + connectToDbAndQueryForData(conIDQ).getInt(1) + 1 + "";
+        for (String nM : newMembers) {
+            String addMQ = "INSERT INTO (connectionID, userID, chatroomID)VALUES UsersInChatrooms ('" + conID + "','" + nM + "','" + cID + "');";
+            if (!connectToDbAndExecuteQuery(addMQ)) return false;
         }
-        @SneakyThrows
-        public boolean addUsersToChat(List<String> newMembers, String cID){
-            String conIDQ = "SELECT COUNT(connectionID) FROM UsersInChatrooms;";
-            String conID = "C"+connectToDbAndQueryForData(conIDQ).getInt(1)+1+"";
-            for(String nM : newMembers){
-                String addMQ = "INSERT INTO (connectionID, userID, chatroomID)VALUES UsersInChatrooms ('"+conID+"','"+nM+"','"+cID+"');";
-                if (!connectToDbAndExecuteQuery(addMQ)) return false;
-            }
-            return true;
+        return true;
+    }
+
+    @SneakyThrows
+    public boolean removeUsersFromChat(List<String> formerMembers, String cID) {
+        for (String fM : formerMembers) {
+            String removeMQ = "UPDATE UsersInChatrooms SET userID = 'REMOVED USER' " +
+                    "WHERE userID = '" + fM + "' AND chatroomID = '" + cID + "';";
+            if (!connectToDbAndExecuteQuery(removeMQ)) return false;
         }
-        @SneakyThrows
-        public boolean removeUsersFromChat(List<String> formerMembers, String cID){
-            for(String fM : formerMembers){
-                String removeMQ = "UPDATE UsersInChatrooms SET userID = 'REMOVED USER' " +
-                                  "WHERE userID = '"+fM+"' AND chatroomID = '"+cID+"';";
-                if(!connectToDbAndExecuteQuery(removeMQ)) return false;
-            }
-            return true;
-        }
+        return true;
+    }
     //endregion
 
     //region REGION load word filter
     @SneakyThrows
-    public List<String> loadFilteredWordList(){
+    public List<String> loadFilteredWordList() {
         String filteredWQ = "SELECT * FROM BadWords;";
         return convertResultToStringList(connectToDbAndQueryForData(filteredWQ));
     }
+
     //endregion
     @SneakyThrows
-    public List<String> convertResultToStringList(ResultSet rs){
-            List<String> res = new ArrayList<>();
-            if(rs!=null){
-                for(int i = 0; i < rs.getFetchSize(); i++){
-                    res.add(rs.getString(i+1));
-                }
+    public List<String> convertResultToStringList(ResultSet rs) {
+        List<String> res = new ArrayList<>();
+        if (rs != null) {
+            for (int i = 0; i < rs.getFetchSize(); i++) {
+                res.add(rs.getString(i + 1));
             }
-
-            return res;
+        }
+        return res;
     }
 }
-
-
